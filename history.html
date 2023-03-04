@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Search History</title>
+    <!-- INLINE CSS  -->
+    <style>
+      * {
+        background-color: rgb(0, 0, 0);
+        color: white;
+      }
+      #searchHistory {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Your Previous Searches</h1>
+    <div id="searchHistory"></div>
+    <button id="clearSearch">Clear Search</button>
+
+    <!-- LINE JAVASCRIPT -->
+    <script>
+      // Get the search history from local storage
+      const searchHistory = JSON.parse(localStorage.getItem("bookSearches"));
+
+      // Get the UL element to display the search history
+      const searchHistoryList = document.getElementById("searchHistory");
+      //   console.log("searchHistory", searchHistory);
+
+      // Loop through the search history and create a list item for each search
+      let count = 0;
+      if (searchHistory) {
+        searchHistory.forEach((search) => {
+          count++;
+          const li = document.createElement("div");
+
+          li.style.display = "flex";
+          li.style.flexwarp = "wrap";
+          li.style.justifycontent = "space-around";
+
+          const searchTerm = search[0].searchTerm;
+          const timestamp = new Date(search[0].timestamp);
+          const date = timestamp.toLocaleDateString();
+          const time = timestamp.toLocaleTimeString();
+          li.innerHTML = `<div style="border:1px solid black; margin:10px">${count}.${searchTerm}    Searched On:${date} at ${time}</div>`;
+          // (Searched On: ${date} at ${time})`;
+          li.addEventListener("click", () => {
+            // Display the book data for the clicked search result
+            displayBookData(li, search);
+          });
+          searchHistoryList.appendChild(li);
+        });
+      } else {
+        searchHistoryList.innerHTML = "No Search Results";
+      }
+
+      // Handle the clear search button click event
+      const clearSearchButton = document.getElementById("clearSearch");
+      clearSearchButton.addEventListener("click", () => {
+        localStorage.removeItem("bookSearches");
+        searchHistoryList.innerHTML = "No Search Result Found";
+      });
+
+      function displayBookData(li, search) {
+        // console.log("search", search);
+        // Get the search result from the search history
+        const searchResult = search[0].data.items;
+        // console.log("searchResult", searchResult);
+        // Clear the current book list
+        // const bookList = document.getElementById("bookList");
+        // bookList.innerHTML = "";
+
+        // Display the book data for each result in the search result
+        searchResult.forEach((book) => {
+          //   console.log("book", book);
+          const title = book.volumeInfo.title;
+          const authors = book.volumeInfo.authors
+            ? book.volumeInfo.authors.join(", ")
+            : "Unknown";
+          const publisher = book.volumeInfo.publisher
+            ? book.volumeInfo.publisher
+            : "Unknown";
+          const pageCount = book.volumeInfo.pageCount
+            ? book.volumeInfo.pageCount
+            : "Unknown";
+          const imageLink = book.volumeInfo.imageLinks
+            ? book.volumeInfo.imageLinks.thumbnail
+            : "https://via.placeholder.com/128x196.png?text=No+Cover";
+          const buyLink = book.saleInfo.buyLink ? book.saleInfo.buyLink : "#";
+
+          // Create the HTML for the book data
+
+          const bookDiv = document.createElement("div");
+          bookDiv.style.display = "flex";
+          bookDiv.style.flexWrap = "wrap";
+          bookDiv.classList.add("bookDiv");
+          bookDiv.innerHTML = `
+            <div class="book">
+              <img src="${imageLink}" alt="${title}">
+              <h2>${title}</h2>
+              <p>Author(s): ${authors}</p>
+              <p>Publisher: ${publisher}</p>
+              <p>Page Count: ${pageCount}</p>
+              <a href="${buyLink}" target="_blank" rel="noopener noreferrer" class="buy-button">Buy Now</a>
+            </div>
+          `;
+
+          // Add the book HTML to the book list
+          //   console.log("bookHTML", bookHTML);
+          //   console.log("li", li);
+          li.appendChild(bookDiv);
+        });
+      }
+    </script>
+  </body>
+</html>
